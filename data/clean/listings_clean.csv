@@ -1,8 +1,114 @@
-id,title,city,neighborhood,price,surface_m2,rooms,type,listing_date,price_per_m2
-1,Appartement moderne Casablanca,Casablanca,Maarif,1200000.0,85,3,Appartement,2024-01-15,14117.65
-2,Villa avec piscine Marrakech,Marrakech,Palmeraie,4500000.0,320,6,Villa,2024-01-20,14062.5
-3,Studio Rabat centre,Rabat,Agdal,450000.0,35,1,Studio,2024-02-01,12857.14
-5,Riad traditionnel Fes,Fes,Medina,2200000.0,200,5,Riad,2024-02-14,11000.0
-7,Appartement Casablanca,Casablanca,Bourgogne,950000.0,75,3,Appartement,2024-03-05,12666.67
-8,Studio Marrakech,Marrakech,Gueliz,380000.0,32,1,Studio,2024-03-10,11875.0
-9,Appartement Rabat,Rabat,Hay Riad,780000.0,90,3,Appartement,2024-03-12,8666.67
+title,price,currency,city,category,seller,url
+Bureaux à louer d'une superficie 37 m²,3515,DH,Lissasfa,Bureaux,FACILITIES BUSINESS CENTER,https://www.avito.ma/fr/lissasfa/bureaux/Bureaux_à_louer_d_une_superficie_37_m²_57020706.htm
+Terrain résidentiel à vendre près de Souika Azzouzia,760000,DH,Azzouzia,Terrains Et Fermes,Marrakech Immo Pro,https://www.avito.ma/fr/azzouzia/terrains_et_fermes/Terrain_résidentiel_à_vendre_près_de_Souika_Azzouzia_57396102.htm
+Bureaux de 39 à 132m² à Tassila Ext Al Houda,510000,DH,Tassila,Bureaux,CHAABI LIL ISKANE,https://www.avito.ma/fr/tassila/bureaux/Bureaux_de_39_à_132m²_à_Tassila_Ext_Al_Houda_55504876.htm
+Studio à vendre 38 m² à Casablanca,850000,DH,Abdelmoumen,Appartements,,https://www.avito.ma/fr/abdelmoumen/appartements/Studio_à_vendre_38_m²_à_Casablanca_56661805.htm
+Très bel appartement,250,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Très_bel_appartement_57701992.htm
+Appartement à Guéliz,250,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Appartement_à_Guéliz_57701993.htm
+Appartement centre de Marrakech,250,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Appartement_centre_de_Marrakech_57701994.htm
+Appartement à louer,250,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Appartement_à_louer_57701995.htm
+Hammam à vendre - Kénitra,980000,DH,Taïbia,Autre Immobilier,CHAABI LIL ISKANE,https://www.avito.ma/fr/taïbia/autre_immobilier/Hammam_à_vendre___Kénitra_55502675.htm
+Studio Premium 60m² à Boulevard Anoual,1110000,DH,Quartier Des Hôpitaux,Appartements,,https://www.avito.ma/fr/quartier_des_hôpitaux/appartements/Studio_Premium_60m²_à_Boulevard_Anoual_54987776.htm
+FES-SA-1045 - Appartement à vendre à Route immouzer,1430000,DH,Autre Secteur,Appartements,,https://www.avito.ma/fr/autre_secteur/appartements/FES_SA_1045___Appartement_à_vendre_à_Route_immouzer_57501574.htm
+Appartement à vendre 72 m² à Casablanca,1630600,DH,Hôrloge,Appartements,,https://www.avito.ma/fr/hôrloge/appartements/Appartement_à_vendre_72_m²_à_Casablanca_56663843.htm
+Vente Local de 326 m2 à Marrakech,4100000,DH,Ancienne Médina,Local,Milkiya,https://www.avito.ma/fr/ancienne_médina/local/Vente_Local_de_326_m2_à_Marrakech_56505665.htm
+Terrains 1100m à 2600m Zone Villa A Californie,0,DH,Californie,Terrains Et Fermes,Services El bidaoui immo,https://www.avito.ma/fr/californie/terrains_et_fermes/Terrains_1100m_à_2600m_Zone_Villa_A_Californie_57641979.htm
+Grand appart 121m² à Najd près Mabrouka,1100000,DH,Mabrouka,Appartements,,https://www.avito.ma/fr/mabrouka/appartements/Grand_appart_121m²_à_Najd_près_Mabrouka_57577324.htm
+Ecole/Crèche à vendre - Casablanca Al Azhar,2500000,DH,Sidi Bernoussi,Autre Immobilier,CHAABI LIL ISKANE,https://www.avito.ma/fr/sidi_bernoussi/autre_immobilier/Ecole_Crèche_à_vendre___Casablanca_Al_Azhar_55503307.htm
+JOLI STUDIO A LOUER MEUBLE SUR GAUTIER,7000,DH,Gauthier,Appartements,,https://www.avito.ma/fr/gauthier/appartements/JOLI_STUDIO_A_LOUER_MEUBLE_SUR_GAUTIER_57136526.htm
+Magnifique Riad à vendre 180 m² à Marrakech,2000000,DH,Bab El Khemis,Villas Et Riads,IMMO GLOBAL BUSINESS,https://www.avito.ma/fr/bab_el_khemis/villas_et_riads/Magnifique_Riad_à_vendre_180_m²_à_Marrakech_57535818.htm
+CMN-ME-1665 - Appartement à vendre à 2 Mars,1520000,DH,2 Mars,Appartements,,https://www.avito.ma/fr/2_mars/appartements/CMN_ME_1665___Appartement_à_vendre_à_2_Mars_56725475.htm
+Location Bureau de 700 m2 à Casablanca,120000,DH,Gauthier,Bureaux,Milkiya,https://www.avito.ma/fr/gauthier/bureaux/Location_Bureau_de_700_m2_à_Casablanca_56599560.htm
+Terrain commercial en vente à Temara,5000000,DH,Centre Ville,Terrains Et Fermes,Agence immobilière ben Hammou,https://www.avito.ma/fr/centre_ville/terrains_et_fermes/Terrain_commercial_en_vente_à_Temara_57497103.htm
+Appartement à louer à coté du Bayti Sakan,4800,DH,Autre Secteur,Appartements,,https://www.avito.ma/fr/autre_secteur/appartements/Appartement_à_louer_à_coté_du_Bayti_Sakan_57570072.htm
+Terrain titre 115 m2 lot Al yamama 2 facades 20/12,0,DH,Centre,Terrains Et Fermes,Agence Immobliere ABOU ISHAK,https://www.avito.ma/fr/centre/terrains_et_fermes/Terrain_titre_115_m2_lot_Al_yamama_2_facades_20_12_56957823.htm
+Terrain 5ha Zone Villa A Achakar,0,DH,Achakar,Terrains Et Fermes,Services El bidaoui immo,https://www.avito.ma/fr/achakar/terrains_et_fermes/Terrain_5ha_Zone_Villa_A_Achakar_57315799.htm
+CMN-ME-1679 - Appartement à vendre à La Gironde,1290000,DH,La Gironde,Appartements,,https://www.avito.ma/fr/la_gironde/appartements/CMN_ME_1679___Appartement_à_vendre_à_La_Gironde_57291339.htm
+Appartement à Marrakech Guéliz,250,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Appartement_à_Marrakech_Guéliz_57669111.htm
+Bureau de 74 à 114 m² à Hay Al Fath,12000,DH,Hay El Fath,Bureaux,CHAABI LIL ISKANE,https://www.avito.ma/fr/hay_el_fath/bureaux/Bureau_de_74_à_114_m²_à_Hay_Al_Fath_40564118.htm
+RBA-YA-1053 - Appartement à vendre à Hay El Menzah,2100000,DH,Autre Secteur,Appartements,,https://www.avito.ma/fr/autre_secteur/appartements/RBA_YA_1053___Appartement_à_vendre_à_Hay_El_Menzah_56835389.htm
+Bella Vista deux villas avec garages extérieurs,7500000,DH,Malabata,Villas Et Riads,AWRACH imobilier,https://www.avito.ma/fr/malabata/villas_et_riads/Bella_Vista_deux_villas_avec_garages_extérieurs_57243515.htm
+Prix fix appartement,500,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Prix_fix_appartement_56713611.htm
+CMN-MA-2088 - Appartement à vendre à Maârif,1900000,DH,Maârif Extension,Appartements,,https://www.avito.ma/fr/maârif_extension/appartements/CMN_MA_2088___Appartement_à_vendre_à_Maârif_56292682.htm
+STUDIO LOCATION MEUBLE VAL FLEURI,9000,DH,Val Fleuri,Appartements,,https://www.avito.ma/fr/val_fleuri/appartements/STUDIO_LOCATION_MEUBLE_VAL_FLEURI_57618867.htm
+TRES BEL APPARTEMENT AVEC VUE DEGAGEE,11500,DH,Hay Riad,Appartements,,https://www.avito.ma/fr/hay_riad/appartements/TRES_BEL_APPARTEMENT_AVEC_VUE_DEGAGEE_57272607.htm
+Magnifique appartement 2 chambres avec terrasse,18000,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Magnifique_appartement_2_chambres_avec_terrasse_57490829.htm
+Appartement 2 chambres et salon 76 m² T3 - 2 ÉTAGE,660000,DH,Alliance,Appartements,,https://www.avito.ma/fr/alliance/appartements/Appartement_2_chambres_et_salon_76_m²_T3___2_ÉTAGE_57319573.htm
+Plateaux Bureau neuf en location - Roches Noires,6500,DH,Roches Noires,Bureaux,Agence Rafiq Immobilier ,https://www.avito.ma/fr/roches_noires/bureaux/Plateaux_Bureau_neuf_en_location___Roches_Noires_56234446.htm
+Studio Location de vacances Casablanca,600,DH,C.I.L,Appartements,,https://www.avito.ma/fr/c.i.l/appartements/Studio_Location_de_vacances_Casablanca_52878792.htm
+Bureaux 130m2 belvédère casa,6500,DH,Belvédère,Bureaux,Agence immobelvedere,https://www.avito.ma/fr/belvédère/bureaux/Bureaux_130m2_belvédère_casa_57701985.htm
+"14 km Marrakech, terrain de 22000m² zone industrielle",1300000,DH,Route De Casablanca,Local,بيع وشراء,https://www.avito.ma/fr/route_de_casablanca/local/14_km_Marrakech__terrain_de_22000m²_zone_industrielle_56987693.htm
+"Appartement titré à vendre à Martil, proche plage",600000,DH,Martil,Appartements,,https://www.avito.ma/fr/martil/appartements/Appartement_titré_à_vendre_à_Martil__proche_plage_55445136.htm
+Appartement vide à louer au complexe Farah,2800,DH,Autre Secteur,Appartements,,https://www.avito.ma/fr/autre_secteur/appartements/Appartement_vide_à_louer_au_complexe_Farah_57701996.htm
+Studio Neuf en location - Roches Noires,5800,DH,Roches Noires,Appartements,,https://www.avito.ma/fr/roches_noires/appartements/Studio_Neuf_en_location___Roches_Noires_56050577.htm
+Villa 1093m Luxe Front Golf Ville Vert,16300000,DH,Ville Verte,Villas Et Riads,Services El bidaoui immo,https://www.avito.ma/fr/ville_verte/villas_et_riads/Villa_1093m_Luxe_Front_Golf_Ville_Vert_57145234.htm
+Très bel appartement meublé à louer – Guéliz,12000,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Très_bel_appartement_meublé_à_louer___Guéliz_57523057.htm
+Appart Meublé à Vendre 90m – Hay Massira Rabat,1200000,DH,Massira,Appartements,,https://www.avito.ma/fr/massira/appartements/Appart_Meublé_à_Vendre_90m___Hay_Massira_Rabat_57442574.htm
+Appart 3ch salon 87m2 près Sup de co,920000,DH,Bd Moulay Abdellah,Appartements,,https://www.avito.ma/fr/bd_moulay_abdellah/appartements/Appart_3ch_salon_87m2_près_Sup_de_co_57577173.htm
+Magasin à louer route 30 Laâwama,30000,DH,Aouama Gharbia,Local,AWRACH imobilier,https://www.avito.ma/fr/aouama_gharbia/local/Magasin_à_louer_route_30_Laâwama_56202551.htm
+Appartement à vendre situé à Malabata Hills,2800000,DH,Malabata,Appartements,,https://www.avito.ma/fr/malabata/appartements/Appartement_à_vendre_situé_à_Malabata_Hills_57517916.htm
+Appartement Moderne à louer,0,DH,Centre Ville,Appartements,,https://www.avito.ma/fr/centre_ville/appartements/Appartement_Moderne_à_louer_57374571.htm
+Bureaux équipés location Abdelmoumen casa,6500,DH,Abdelmoumen,Bureaux,Agence immobelvedere,https://www.avito.ma/fr/abdelmoumen/bureaux/Bureaux_équipés_location_Abdelmoumen_casa_57701989.htm
+Studio vide à louer. À Casablanca belvédère,4500,DH,Belvédère,Appartements,,https://www.avito.ma/fr/belvédère/appartements/Studio_vide_à_louer__À_Casablanca_belvédère_57701997.htm
+Villa Vide à Californie,37000,DH,Californie,Villas Et Riads,LUXE ORIGINALE IMMO,https://www.avito.ma/fr/californie/villas_et_riads/Villa_Vide_à_Californie_48825328.htm
+Magasin 109m À Ain Chok,6000,DH,Aïn Chock,Local,Services El bidaoui immo,https://www.avito.ma/fr/aïn_chock/local/Magasin_109m_À_Ain_Chok_57448363.htm
+Mon bel appartement à louer,300,DH,Hay Mohammadi,Appartements,,https://www.avito.ma/fr/hay_mohammadi/appartements/Mon_bel_appartement_à_louer_56699686.htm
+Appartement bien placé,400,DH,Allal El Fassi,Appartements,,https://www.avito.ma/fr/allal_el_fassi/appartements/Appartement_bien_placé_57539764.htm
+Mon bel appartement à louer à Islan,300,DH,Hay Mohammadi,Appartements,,https://www.avito.ma/fr/hay_mohammadi/appartements/Mon_bel_appartement_à_louer_à_Islan_54907149.htm
+3.63 ha titré sur la route à Benslimane ain laksab,2350000,DH,Autre Secteur,Terrains Et Fermes,NFAS IMMO,https://www.avito.ma/fr/autre_secteur/terrains_et_fermes/3_63_ha_titré_sur_la_route_à_Benslimane_ain_laksab_57679811.htm
+bureau équipé 70ma coté bd abdelmoumen tram,5300,DH,Abdelmoumen,Bureaux,Agence Immobilière alwahda,https://www.avito.ma/fr/abdelmoumen/bureaux/bureau_équipé_70ma_coté_bd_abdelmoumen_tram_55801751.htm
+Appartement neuf sur bd zerktouni et massira,0,DH,Anfa,Appartements,,https://www.avito.ma/fr/anfa/appartements/Appartement_neuf_sur_bd_zerktouni_et_massira_57679952.htm
+Appartement à vendre Derb SELTANE BOUCHENTOUF,250000,DH,Al Fida,Appartements,,https://www.avito.ma/fr/al_fida/appartements/Appartement_à_vendre_Derb_SELTANE_BOUCHENTOUF_57701984.htm
+Terrain de 4 hectares à vendre,3200000,DH,Ain Attig,Terrains Et Fermes,PB CONSEILS IMMO,https://www.avito.ma/fr/ain_attig/terrains_et_fermes/Terrain_de_4_hectares_à_vendre_57403770.htm
+Salle de sport à vendre - Kénitra,1224000,DH,Taïbia,Autre Immobilier,CHAABI LIL ISKANE,https://www.avito.ma/fr/taïbia/autre_immobilier/Salle_de_sport_à_vendre___Kénitra_55502795.htm
+Maison triplex spacieuse avec jardin et terrasse,3250000,DH,Florida,Maisons,,https://www.avito.ma/fr/florida/maisons/Maison_triplex_spacieuse_avec_jardin_et_terrasse_56941776.htm
+CMN-AI-1064 - Appartement à vendre à Aïn Sebaâ,1600000,DH,Ain Sebaa,Appartements,,https://www.avito.ma/fr/ain_sebaa/appartements/CMN_AI_1064___Appartement_à_vendre_à_Aïn_Sebaâ_57304589.htm
+Superbe Villa à louer Meublée à Targa avec piscine,24000,DH,Targa,Villas Et Riads,MRI IMMO,https://www.avito.ma/fr/targa/villas_et_riads/Superbe_Villa_à_louer_Meublée_à_Targa_avec_piscine_57604494.htm
+Appartement avec Terrasse au Quartier du Parc,6500,DH,Quartier Du Parc,Appartements,,https://www.avito.ma/fr/quartier_du_parc/appartements/Appartement_avec_Terrasse_au_Quartier_du_Parc_55487494.htm
+Appartement à vendre 260 m² à Casablanca,5500000,DH,Anfa,Appartements,,https://www.avito.ma/fr/anfa/appartements/Appartement_à_vendre_260_m²_à_Casablanca_56346265.htm
+Opportunité 57 m² à Tanger Idéal Locatif,600000,DH,Tanja Balia,Appartements,,https://www.avito.ma/fr/tanja_balia/appartements/Opportunité_57_m²_à_Tanger_Idéal_Locatif_57692978.htm
+Appartement à vendre Boulevard Yacoub El Mansour,1834700,DH,Roches Noires,Appartements,,https://www.avito.ma/fr/roches_noires/appartements/Appartement_à_vendre_Boulevard_Yacoub_El_Mansour_56778477.htm
+Studio à vendre 58 m² à Marrakech,986000,DH,Majorelle,Appartements,,https://www.avito.ma/fr/majorelle/appartements/Studio_à_vendre_58_m²_à_Marrakech_57292606.htm
+Bureau propre en location mly driss,4500,DH,2 Mars,Bureaux,Immo service,https://www.avito.ma/fr/2_mars/bureaux/Bureau_propre_en_location_mly_driss_57176293.htm
+terrain immeuble de 344m2,5160000,DH,Autre Secteur,Terrains Et Fermes,Agence immobilière ben Hammou,https://www.avito.ma/fr/autre_secteur/terrains_et_fermes/terrain_immeuble_de_344m2_57499178.htm
+Studio à louer à la journée à Rabat Agdal,600,DH,Agdal,Appartements,,https://www.avito.ma/fr/agdal/appartements/Studio_à_louer_à_la_journée_à_Rabat_Agdal_56554114.htm
+Appartement à vendre 54 m² à Agadir,560000,DH,Hay Salam,Appartements,,https://www.avito.ma/fr/hay_salam/appartements/Appartement_à_vendre_54_m²_à_Agadir_57604408.htm
+Terrain 13ha Zone Immeuble A Mghogha,0,DH,Mghogha,Terrains Et Fermes,Services El bidaoui immo,https://www.avito.ma/fr/mghogha/terrains_et_fermes/Terrain_13ha_Zone_Immeuble_A_Mghogha_57187742.htm
+Appartement à louer par jour,250,DH,Malabata,Appartements,,https://www.avito.ma/fr/malabata/appartements/Appartement_à_louer_par_jour_48490215.htm
+Appartement à vendre 80 m² à Salé,792000,DH,Sala El Jadida,Appartements,,https://www.avito.ma/fr/sala_el_jadida/appartements/Appartement_à_vendre_80_m²_à_Salé_57569210.htm
+Appartements modernes à vendre à Marrakech,740000,DH,Azli,Appartements,,https://www.avito.ma/fr/azli/appartements/Appartements_modernes_à_vendre_à_Marrakech_57208119.htm
+Café-Restaurant en Bord de Mer Route Côtière,7100000,DH,Yacoub El Mansour,Local,Agence Immobilière La Clé du Rêve ,https://www.avito.ma/fr/yacoub_el_mansour/local/Café_Restaurant_en_Bord_de_Mer_Route_Côtière_56298580.htm
+"Appartements à vendre à Casablanca, Bousijour.",770000,DH,Beauséjour,Appartements,,https://www.avito.ma/fr/beauséjour/appartements/Appartements_à_vendre_à_Casablanca__Bousijour__57701975.htm
+Appartement Haut Standing Wifak,1250000,DH,Wifak,Appartements,,https://www.avito.ma/fr/wifak/appartements/Appartement_Haut_Standing_Wifak_57630734.htm
+Magasin propre en location Gauthier 84m,17000,DH,Gauthier,Local,Immo service,https://www.avito.ma/fr/gauthier/local/Magasin_propre_en_location_Gauthier_84m_56915168.htm
+Appartement à vendre 80 m² à Kénitra,690000,DH,Alliance,Appartements,,https://www.avito.ma/fr/alliance/appartements/Appartement_à_vendre_80_m²_à_Kénitra_56583965.htm
+Appartement à vendre à Tilila,760000,DH,Tilila,Appartements,,https://www.avito.ma/fr/tilila/appartements/Appartement_à_vendre_à_Tilila_57075363.htm
+Showroom à vendre ou à louer,0,DH,Autre Secteur,Local,Y M,https://www.avito.ma/fr/autre_secteur/local/Showroom_à_vendre_ou_à_louer_57618792.htm
+Appartement rénové neuf haut Agdal Rabat,12000,DH,Agdal,Bureaux,MOUNIRIMMO,https://www.avito.ma/fr/agdal/bureaux/Appartement_rénové_neuf_haut_Agdal_Rabat_57378585.htm
+"Ferme à vendre, potentielle maison d’hôtes",0,DH,Saies,Terrains Et Fermes,Abdallah,https://www.avito.ma/fr/saies/terrains_et_fermes/Ferme_à_vendre__potentielle_maison_d_hôtes_56270664.htm
+Terrain lot 80m² R 2 résidentiel et commercial,300000,DH,Tahannaout,Terrains Et Fermes,BERDAI Driss,https://www.avito.ma/fr/tahannaout/terrains_et_fermes/Terrain_lot_80m²_R_2_résidentiel_et_commercial_56454359.htm
+Plateau bureau neuf 63 m² Hay Hassani,7500,DH,Hay Hassani,Bureaux,First One immobilier,https://www.avito.ma/fr/hay_hassani/bureaux/Plateau_bureau_neuf_63_m²_Hay_Hassani_57085660.htm
+Appartement bien rangé,350,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Appartement_bien_rangé_55505244.htm
+Magnifique villa sur résidence sécurisée à Targa,13000,DH,Hay Targa,Villas Et Riads,Mozagh Signature,https://www.avito.ma/fr/hay_targa/villas_et_riads/Magnifique_villa_sur_résidence_sécurisée_à_Targa_57447539.htm
+Terrains à vendre lotissement ouriach mghogha,0,DH,Mghogha,Terrains Et Fermes,Agence Immobliere ABOU ISHAK,https://www.avito.ma/fr/mghogha/terrains_et_fermes/Terrains_à_vendre_lotissement_ouriach_mghogha_54858586.htm
+Vente Bureau de 129 m2 à Casablanca,1700000,DH,Maarif,Bureaux,Milkiya,https://www.avito.ma/fr/maarif/bureaux/Vente_Bureau_de_129_m2_à_Casablanca_57290853.htm
+CMN-ME-1691 - Appartement à vendre à 2 Mars,2180000,DH,2 Mars,Appartements,,https://www.avito.ma/fr/2_mars/appartements/CMN_ME_1691___Appartement_à_vendre_à_2_Mars_57340227.htm
+Appartement 70 m2 Meublé à l'Ourika,3500,DH,Route D Ourika,Appartements,,https://www.avito.ma/fr/route_d_ourika/appartements/Appartement_70_m2_Meublé_à_l_Ourika_32782149.htm
+location par jour un appartement,0,DH,Bourgogne,Appartements,,https://www.avito.ma/fr/bourgogne/appartements/location_par_jour_un_appartement_56865538.htm
+Terrain villa 800m à vendre zone villa,0,DH,Sidi Bouzid,Villas Et Riads,Berrada immo,https://www.avito.ma/fr/sidi_bouzid/villas_et_riads/Terrain_villa_800m_à_vendre_zone_villa_56454949.htm
+À vendre terrain agricole 10 000 M route al amira,0,DH,Route D Azemmour,Terrains Et Fermes,Berrada immo,https://www.avito.ma/fr/route_d_azemmour/terrains_et_fermes/À_vendre_terrain_agricole_10_000_M_route_al_amira_57607052.htm
+À LOUER – DUPLEX MEUBLÉ AVEC PISCINE – MABROUKA,7500,DH,Mabrouka,Appartements,,https://www.avito.ma/fr/mabrouka/appartements/À_LOUER___DUPLEX_MEUBLÉ_AVEC_PISCINE___MABROUKA_57049768.htm
+Appartement à louer 120 m² à Casablanca,5000,DH,Florida,Appartements,,https://www.avito.ma/fr/florida/appartements/Appartement_à_louer_120_m²_à_Casablanca_57525689.htm
+Appartement 2 chambres et salon 75 m² T3 -3 ÉTAGE,657000,DH,Alliance,Appartements,,https://www.avito.ma/fr/alliance/appartements/Appartement_2_chambres_et_salon_75_m²_T3__3_ÉTAGE_56699925.htm
+Appart.1èr étage 127 m2 O.Taleb à coté fin Taddart,1700000,DH,Californie,Appartements,,https://www.avito.ma/fr/californie/appartements/Appart_1èr_étage_127_m2_O_Taleb_à_coté_fin_Taddart_56165129.htm
+Appartement exceptionnel à louer. Bienvenue,350,DH,Guéliz,Appartements,,https://www.avito.ma/fr/guéliz/appartements/Appartement_exceptionnel_à_louer__Bienvenue_56430465.htm
+Magnifique local commercial avec plateau bureaux,4250000,DH,Quartier Des Hôpitaux,Local,Team Immo Maroc,https://www.avito.ma/fr/quartier_des_hôpitaux/local/Magnifique_local_commercial_avec_plateau_bureaux_57169326.htm
+BEN-MA-1119 - Appartement à vendre à Mansouria-B...,1640000,DH,Autre Secteur,Appartements,,https://www.avito.ma/fr/autre_secteur/appartements/BEN_MA_1119___Appartement_à_vendre_à_Mansouria_B____57356776.htm
+Apt Meublé Sécurisé/3Chambres/ Filles⛔ Bd Roudani,6000,DH,Centre Ville,Appartements,,https://www.avito.ma/fr/centre_ville/appartements/Apt_Meublé_Sécurisé_3Chambres__Filles__Bd_Roudani_57652939.htm
+Des Plateaux de bureaux,930000,DH,Ain Sebaa,Bureaux,Avito Immo Neuf,https://www.avito.ma/fr/ain_sebaa/bureaux/Des_Plateaux_de_bureaux_56663845.htm
+BEN-BO-1098 - Appartement à louer à Bouznika,3000,DH,Autre Secteur,Appartements,,https://www.avito.ma/fr/autre_secteur/appartements/BEN_BO_1098___Appartement_à_louer_à_Bouznika_57580829.htm
+Nouvel appart meublé à Bouskoura,4000,DH,Bouskoura Centre,Appartements,,https://www.avito.ma/fr/bouskoura_centre/appartements/Nouvel_appart_meublé_à_Bouskoura_57510916.htm
+Vente Local de 136 m2 à Dar Bouazza,1344000,DH,Dar Bouazza,Local,Milkiya,https://www.avito.ma/fr/dar_bouazza/local/Vente_Local_de_136_m2_à_Dar_Bouazza_56713807.htm
+magasin commercial a californie,12000,DH,Californie,Local,services immo,https://www.avito.ma/fr/californie/local/magasin_commercial_a_californie_57477248.htm
+Appartement à vendre,600000,DH,Centre,Appartements,,https://www.avito.ma/fr/centre/appartements/Appartement_à_vendre_57644398.htm
+Appartement à louer au mois à Ahlane,6500,DH,Ahlane,Appartements,,https://www.avito.ma/fr/ahlane/appartements/Appartement_à_louer_au_mois_à_Ahlane_56810230.htm

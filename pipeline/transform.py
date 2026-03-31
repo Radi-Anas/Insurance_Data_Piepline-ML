@@ -73,3 +73,32 @@ def save_clean_csv(df: pd.DataFrame, output_path: str) -> None:
     """Save the clean DataFrame to CSV as a checkpoint (useful for debugging)."""
     df.to_csv(output_path, index=False)
     logger.info(f"Clean data saved to {output_path}")
+    
+    
+def transform_scraped(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean scraped data from Avito.
+    Lighter version of transform() — scraped data has fewer columns.
+    """
+    logger.info("Transforming scraped data...")
+
+    # Drop rows where both title and price are missing
+    df = df.dropna(subset=["title", "price"], how="all")
+
+    # Clean price: remove currency text, spaces, and convert to numeric
+    df["price"] = (
+        df["price"]
+        .astype(str)
+        .str.replace(r"[^\d]", "", regex=True)  # Keep digits only
+        .replace("", None)
+    )
+    df["price"] = pd.to_numeric(df["price"], errors="coerce")
+
+    # Drop duplicates based on URL (each listing should be unique)
+    df = df.drop_duplicates(subset=["url"])
+
+    # Drop rows with no price
+    df = df.dropna(subset=["price"])
+
+    logger.info(f"Scraped transform complete. {len(df)} clean rows.")
+    return df
