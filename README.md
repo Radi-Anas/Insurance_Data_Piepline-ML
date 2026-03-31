@@ -1,59 +1,135 @@
-#  Moroccan Real Estate Data Pipeline
+# Moroccan Real Estate Data Pipeline
 
-An end-to-end ETL (Extract, Transform, Load) data pipeline built with Python and PostgreSQL,
-using Moroccan real estate listings as the dataset.
+An end-to-end ETL pipeline that scrapes live property listings from Avito.ma,
+cleans the data with pandas, and loads it into PostgreSQL for analysis.
 
-Built as a portfolio project to demonstrate real-world data engineering skills.
+Built as a portfolio project to demonstrate practical data engineering skills
+on a real-world Moroccan dataset.
 
 ---
 
-##  Tech Stack
+## Pipeline Architecture
+```
+┌─────────────────────────────────────────────────┐
+│                  EXTRACT                        │
+│  Mode A: Selenium scraper → Avito.ma (live)     │
+│  Mode B: CSV file → data/raw/listings.csv       │
+└───────────────────┬─────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────┐
+│                 TRANSFORM                       │
+│  pandas: clean prices, drop invalid rows,       │
+│  standardize cities, add price_per_m2           │
+└───────────────────┬─────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────┐
+│                   LOAD                          │
+│  SQLAlchemy → PostgreSQL (listings table)       │
+└───────────────────┬─────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────┐
+│                 ANALYZE                         │
+│  SQL queries: avg price by city, type,          │
+│  affordability ranking, monthly trends          │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+## Tech Stack
 
 | Tool | Purpose |
 |------|---------|
 | Python 3 | Core language |
-| pandas | Data cleaning & transformation |
-| SQLAlchemy | Database connection (ORM) |
+| Selenium | Browser automation for live scraping |
+| BeautifulSoup4 | HTML parsing |
+| pandas | Data cleaning and transformation |
+| SQLAlchemy | Database connection layer |
 | psycopg2 | PostgreSQL driver |
 | PostgreSQL | Data warehouse |
 | python-dotenv | Secure credential management |
 
 ---
 
-##  Project Structure
+## Project Structure
 ```
 morocco_re_pipeline/
-│   main.py              # Pipeline entry point
-│   .env                 # DB credentials (not committed)
-│   requirements.txt     # Python dependencies
+│   main.py                 # Pipeline entry point
+│   .env                    # DB credentials (not committed)
+│   requirements.txt        # Python dependencies
 │
 ├───pipeline/
-│       extract.py       # Load raw CSV data
-│       transform.py     # Clean & standardize data
-│       load.py          # Write to PostgreSQL
+│       extract.py          # Scraper (Selenium) + CSV fallback
+│       transform.py        # Data cleaning and standardization
+│       load.py             # PostgreSQL loader
 │
 ├───data/
-│   ├───raw/             # Original unmodified data
-│   └───clean/           # Cleaned data (post-transform)
+│   ├───raw/
+│   │       listings.csv    # Sample dataset (10 listings)
+│   └───clean/              # Output of transform step
 │
 ├───config/
-│       settings.py      # Centralized configuration
+│       settings.py         # Centralized DB configuration
 │
 └───sql/
-        analysis.sql     # Business analysis queries
+        analysis.sql        # Business analysis queries
 ```
 
 ---
 
-##  How to Run
+## Two Ways to Run
+
+### Mode A — Live scraper (recommended)
+
+Scrapes real listings directly from Avito.ma using Selenium.
+Requires Google Chrome to be installed.
+
+In `main.py`, set:
+```python
+USE_SCRAPER = True
+```
+
+Then run:
+```bash
+python main.py
+```
+
+Each run collects ~30 listings per page. Adjust the number of pages:
+```python
+raw_df = scrape_avito(max_pages=5)  # ~150 listings
+```
+
+---
+
+### Mode B — CSV mode (no browser needed)
+
+Uses the included sample dataset. Useful for testing the
+transform and load steps without hitting the website.
+
+In `main.py`, set:
+```python
+USE_SCRAPER = False
+```
+
+Then run:
+```bash
+python main.py
+```
+
+---
+
+## Setup Instructions
 
 **1. Clone the repo**
 ```bash
-git clone https://github.com/yourusername/morocco_re_pipeline.git
+git clone https://github.com/Radi-Anas/morocco_re_pipeline.git
 cd morocco_re_pipeline
 ```
 
-**2. Create and activate virtual environment**
+**2. Create and activate a virtual environment**
 ```bash
 python -m venv venv
 venv\Scripts\activate        # Windows
@@ -76,7 +152,7 @@ DB_USER=postgres
 DB_PASSWORD=yourpassword
 ```
 
-**5. Create the database**
+**5. Create the PostgreSQL database**
 ```sql
 CREATE DATABASE morocco_re;
 ```
@@ -88,52 +164,72 @@ python main.py
 
 ---
 
-##  Pipeline Steps
-```
-Raw CSV → extract.py → transform.py → load.py → PostgreSQL
-```
+## Data Cleaning Rules
 
-| Step | Script | What it does |
-|------|--------|-------------|
-| Extract | `extract.py` | Reads raw CSV into a DataFrame |
-| Transform | `transform.py` | Cleans prices, drops invalid rows, adds `price_per_m2` |
-| Load | `load.py` | Writes clean data to PostgreSQL |
-
----
-
-##  Data Cleaning Rules
-
-- Rows with missing or non-numeric prices are dropped
-- Rows with zero surface area are dropped
-- City and neighborhood names are standardized (title case)
-- A `price_per_m2` column is derived automatically
+| Rule | Detail |
+|------|--------|
+| Invalid prices dropped | Non-numeric and missing prices removed |
+| Zero surface area dropped | Listings with 0 m² removed |
+| Text fields standardized | City, neighborhood, type → title case |
+| Duplicates removed | Deduplicated by URL (scraper mode) |
+| Price per m² derived | `price_per_m2 = price / surface_m2` |
 
 ---
 
-##  Sample SQL Analysis
+## Sample SQL Analysis
 ```sql
--- Average price per city
-SELECT city, ROUND(AVG(price), 0) AS avg_price
+-- Average price and price per m² by city
+SELECT
+    city,
+    COUNT(*)                    AS listings,
+    ROUND(AVG(price), 0)        AS avg_price,
+    ROUND(AVG(price_per_m2), 0) AS avg_price_per_m2
 FROM listings
+WHERE price > 0
 GROUP BY city
 ORDER BY avg_price DESC;
+
+-- Most affordable listings by price per m²
+SELECT title, city, price, surface_m2, price_per_m2
+FROM listings
+WHERE price > 0
+ORDER BY price_per_m2 ASC
+LIMIT 10;
 ```
 
 ---
 
-##  Roadmap
-
-- [x] CSV extraction
-- [x] Data cleaning with pandas
-- [x] PostgreSQL loading
-- [x] SQL analysis queries
-- [ ] Web scraping (replace CSV with live data)
-- [ ] Scheduled pipeline runs
-- [ ] Dashboard visualization
+## Sample Output
+```
+2026-03-31 11:51:52 [INFO] === Pipeline started ===
+2026-03-31 11:51:54 [INFO] Scraping page 1: https://www.avito.ma/fr/maroc/immobilier?o=1
+2026-03-31 11:52:01 [INFO] Page 1 done. Total collected so far: 38
+2026-03-31 11:52:09 [INFO] Page 2 done. Total collected so far: 76
+2026-03-31 11:52:17 [INFO] Page 3 done. Total collected so far: 114
+2026-03-31 11:52:22 [INFO] Scraping complete. Total raw listings: 113
+2026-03-31 11:52:22 [INFO] Transformation complete. 113 clean rows.
+2026-03-31 11:52:22 [INFO] Loaded 113 rows into table 'listings'.
+2026-03-31 11:52:22 [INFO] === Pipeline finished successfully ===
+```
 
 ---
 
-##  Author
+## Roadmap
+
+- [x] CSV extraction mode
+- [x] Data cleaning with pandas
+- [x] PostgreSQL loading with SQLAlchemy
+- [x] SQL analysis queries
+- [x] Live web scraping with Selenium (Avito.ma)
+- [ ] Scheduled daily runs (Task Scheduler / cron)
+- [ ] Data quality validation layer
+- [ ] Dashboard visualization (Metabase / Grafana)
+- [ ] Airflow orchestration
+- [ ] dbt transformations
+
+---
+
+## Author
 
 **Radi Anas**
-[LinkedIn](https://linkedin.com/in/https://www.linkedin.com/in/radi-anas/) • [GitHub](https://github.com/Radi-Anas)
+[LinkedIn](https://www.linkedin.com/in/radi-anas/) • [GitHub](https://github.com/Radi-Anas) • [Mail](Anasradi556@gmail.com) 
