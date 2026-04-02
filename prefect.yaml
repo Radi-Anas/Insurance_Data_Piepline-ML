@@ -1,0 +1,43 @@
+# Prefect 3.x Deployment Configuration
+# https://docs.prefect.io/v3/deploy/control-runs造影nyaml
+
+includes:
+  - prefect_flow.py:run_pipeline_flow
+
+deployments:
+  - name: morocco-re-dev
+    entrypoint: prefect_flow.py:run_pipeline_flow
+    work_queue: dev-etl
+    schedule:
+      cron: "0 8 * * *"
+      timezone: Africa/Casablanca
+    parameters:
+      source: csv
+      max_pages: 3
+      table_name: listings_dev
+      environment: dev
+
+  - name: morocco-re-staging
+    entrypoint: prefect_flow.py:run_pipeline_flow
+    work_queue: staging-etl
+    schedule:
+      cron: "0 6 * * *"
+      timezone: Africa/Casablanca
+    parameters:
+      source: scraper
+      max_pages: 5
+      table_name: listings_staging
+      environment: staging
+
+  - name: morocco-re-prod
+    entrypoint: prefect_flow.py:run_pipeline_flow
+    work_queue: prod-etl
+    schedule:
+      cron: "0 6 * * *"
+      timezone: Africa/Casablanca
+    parameters:
+      source: scraper
+      max_pages: 10
+      table_name: listings
+      environment: prod
+    concurrency_limit: 1
