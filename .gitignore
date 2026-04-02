@@ -1,7 +1,8 @@
 .env
 venv/
-venv/
-__apache__/
+__pycache__/
 *.pyc
+*.log
 debug_*.py
 *_debug.html
+data/clean/
