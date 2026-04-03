@@ -1,29 +1,23 @@
 """
 load_railway.py
-Load data to Railway PostgreSQL.
+Load data from local CSV to Railway PostgreSQL.
 
 Usage:
-    DATABASE_URL="postgresql://..." python load_railway.py
+    python load_railway.py
 """
 
-import os
 import pandas as pd
-from pipeline.transform import transform, transform_scraped
-from pipeline.load import load_to_postgres
+from sqlalchemy import create_engine
+from pipeline.transform import transform
+
+# Railway PostgreSQL URL (public)
+DATABASE_URL = "postgresql://postgres:xsMyDADlYlVWmSJpVNscxrGLbVZEgOIS@junction.proxy.rlwy.net:27799/railway"
 
 TABLE = "listings"
 
 
 def main():
-    # Use DATABASE_URL from environment (Railway) or .env (local)
-    db_url = os.getenv("DATABASE_URL")
-    
-    if not db_url:
-        print("ERROR: Set DATABASE_URL environment variable")
-        print("Example: DATABASE_URL='postgresql://...' python load_railway.py")
-        return
-    
-    print(f"Loading data to: {db_url.split('@')[1] if '@' in db_url else 'database'}")
+    print("Loading data to Railway PostgreSQL...")
     
     # Load CSV
     df = pd.read_csv("data/raw/listings.csv")
@@ -33,13 +27,16 @@ def main():
     clean = transform(df)
     print(f"Transformed to {len(clean)} rows")
     
-    # Override DATABASE_URL temporarily for load
-    import config.settings
-    config.settings.DATABASE_URL = db_url
-    
-    # Load
-    load_to_postgres(clean, TABLE)
-    print(f"Loaded to '{TABLE}' table")
+    # Load to Railway
+    engine = create_engine(DATABASE_URL)
+    clean.to_sql(
+        name=TABLE,
+        con=engine,
+        if_exists="replace",
+        index=False,
+        method="multi",
+    )
+    print(f"Loaded to Railway PostgreSQL table '{TABLE}'")
     print("Done!")
 
 
