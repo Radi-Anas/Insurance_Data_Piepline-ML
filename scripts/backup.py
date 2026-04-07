@@ -1,24 +1,24 @@
 """
 scripts/backup.py
-Database backup script for PostgreSQL.
+Database backup script using Python/SQLAlchemy (no pg_dump required).
 
 Usage:
     python scripts/backup.py                    # Default backup
     python scripts/backup.py --output my_backup # Custom filename
-    python scripts/backup.py --compress          # Compress backup
 """
 
 import os
 import sys
 import argparse
-import subprocess
-from datetime import datetime
+import json
 import logging
+from datetime import datetime
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from config.settings import DB_CONFIG
+from sqlalchemy import create_engine, text
+from config.settings import DATABASE_URL
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -27,13 +27,12 @@ BACKUP_DIR = "backups"
 os.makedirs(BACKUP_DIR, exist_ok=True)
 
 
-def create_backup(filename: str = None, compress: bool = False) -> str:
+def create_backup(filename: str = None) -> str:
     """
-    Create PostgreSQL backup.
+    Create database backup as JSON.
     
     Args:
         filename: Custom backup filename (without extension)
-        compress: Whether to compress the backup
     
     Returns:
         Path to backup file
@@ -42,53 +41,84 @@ def create_backup(filename: str = None, compress: bool = False) -> str:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"insurance_fraud_{timestamp}"
     
-    db = DB_CONFIG
+    backup_file = f"{BACKUP_DIR}/{filename}.json"
     
-    if compress:
-        backup_file = f"{BACKUP_DIR}/{filename}.sql.gz"
-        cmd = [
-            "pg_dump",
-            "-h", db["host"],
-            "-p", str(db["port"]),
-            "-U", db["user"],
-            "-d", db["database"],
-            "-F", "p",  # Plain SQL format
-        ]
-        cmd += ["-f", "-"]  # Output to stdout
-        
-        # Compress with gzip
-        with open(backup_file, "wb") as f:
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            import gzip
-            with gzip.open(f, "wb") as gz:
-                import shutil
-                shutil.copyfileobj(proc.stdout, gz)
-            proc.wait()
-    else:
-        backup_file = f"{BACKUP_DIR}/{filename}.sql"
-        cmd = [
-            "pg_dump",
-            "-h", db["host"],
-            "-p", str(db["port"]),
-            "-U", db["user"],
-            "-d", db["database"],
-            "-f", backup_file,
-            "-F", "p",  # Plain SQL format
-        ]
-        
-        # Set PGPASSWORD environment variable
-        env = os.environ.copy()
-        env["PGPASSWORD"] = db["password"]
-        
-        result = subprocess.run(cmd, env=env, capture_output=True, text=True)
-        
-        if result.returncode != 0:
-            raise RuntimeError(f"Backup failed: {result.stderr}")
+    engine = create_engine(DATABASE_URL)
     
-    file_size = os.path.getsize(backup_file)
-    logger.info(f"Backup created: {backup_file} ({file_size:,} bytes)")
+    try:
+        with engine.connect() as conn:
+            # Get all claims
+            result = conn.execute(text("SELECT * FROM claims"))
+            rows = result.fetchall()
+            
+            # Get column names
+            columns = result.keys()
+            
+            # Convert to list of dicts
+            data = []
+            for row in rows:
+                data.append(dict(zip(columns, row)))
+        
+        # Write to JSON
+        backup_data = {
+            "timestamp": datetime.now().isoformat(),
+            "table": "claims",
+            "row_count": len(data),
+            "data": data
+        }
+        
+        with open(backup_file, "w") as f:
+            json.dump(backup_data, f, indent=2, default=str)
+        
+        file_size = os.path.getsize(backup_file)
+        logger.info(f"Backup created: {backup_file} ({file_size:,} bytes)")
+        logger.info(f"Rows backed up: {len(data)}")
+        
+        return backup_file
     
-    return backup_file
+    finally:
+        engine.dispose()
+
+
+def restore_backup(backup_file: str) -> int:
+    """
+    Restore database from JSON backup.
+    
+    Args:
+        backup_file: Path to backup file
+    
+    Returns:
+        Number of rows restored
+    """
+    if not os.path.exists(backup_file):
+        raise FileNotFoundError(f"Backup file not found: {backup_file}")
+    
+    import pandas as pd
+    
+    with open(backup_file, "r") as f:
+        backup_data = json.load(f)
+    
+    data = backup_data.get("data", [])
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(data)
+    df = df.drop(columns=['id'], errors='ignore')
+    
+    engine = create_engine(DATABASE_URL)
+    
+    try:
+        with engine.begin() as conn:
+            # Clear existing data
+            conn.execute(text("DELETE FROM claims"))
+        
+        # Use pandas to insert (handles all column types)
+        df.to_sql("claims", engine, if_exists="append", index=False)
+        
+        logger.info(f"Restored {len(df)} rows from {backup_file}")
+        return len(df)
+    
+    finally:
+        engine.dispose()
 
 
 def list_backups() -> list:
@@ -98,60 +128,79 @@ def list_backups() -> list:
     
     backups = []
     for f in os.listdir(BACKUP_DIR):
-        if f.endswith(".sql") or f.endswith(".sql.gz"):
+        if f.endswith(".json"):
             path = os.path.join(BACKUP_DIR, f)
             stat = os.stat(path)
+            
+            # Get row count from file
+            with open(path, "r") as file:
+                try:
+                    data = json.load(file)
+                    row_count = data.get("row_count", 0)
+                except:
+                    row_count = 0
+            
             backups.append({
                 "filename": f,
                 "path": path,
                 "size": stat.st_size,
+                "rows": row_count,
                 "created": datetime.fromtimestamp(stat.st_ctime).isoformat(),
             })
     
     return sorted(backups, key=lambda x: x["created"], reverse=True)
 
 
-def cleanup_old_backups(keep: int = 7):
-    """
-    Remove old backups, keeping only the most recent N.
-    
-    Args:
-        keep: Number of backups to keep
-    """
-    backups = list_backups()
-    
-    if len(backups) <= keep:
-        logger.info(f"No cleanup needed. {len(backups)} backups, keeping all.")
-        return
-    
-    removed = 0
-    for backup in backups[keep:]:
-        os.remove(backup["path"])
-        logger.info(f"Removed old backup: {backup['filename']}")
-        removed += 1
-    
-    logger.info(f"Cleanup complete. Removed {removed} old backups.")
+def verify_backup(backup_file: str) -> dict:
+    """Verify backup file is valid."""
+    try:
+        with open(backup_file, "r") as f:
+            data = json.load(f)
+        
+        return {
+            "valid": True,
+            "timestamp": data.get("timestamp"),
+            "row_count": len(data.get("data", [])),
+            "table": data.get("table"),
+        }
+    except Exception as e:
+        return {"valid": False, "error": str(e)}
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Database backup utility")
     parser.add_argument("--output", "-o", help="Output filename")
-    parser.add_argument("--compress", "-c", action="store_true", help="Compress backup")
     parser.add_argument("--list", "-l", action="store_true", help="List available backups")
-    parser.add_argument("--cleanup", type=int, default=0, help="Cleanup old backups (keep N)")
+    parser.add_argument("--restore", "-r", help="Restore from backup file")
+    parser.add_argument("--verify", "-v", help="Verify backup file")
     
     args = parser.parse_args()
     
     if args.list:
         backups = list_backups()
         print(f"\nAvailable backups in {BACKUP_DIR}:")
-        print("-" * 60)
+        print("-" * 70)
         for b in backups:
-            print(f"{b['created']} | {b['filename']} | {b['size']:,} bytes")
+            print(f"{b['created']} | {b['filename']} | {b['rows']:,} rows | {b['size']:,} bytes")
     
-    elif args.cleanup > 0:
-        cleanup_old_backups(args.cleanup)
+    elif args.verify:
+        result = verify_backup(args.verify)
+        if result["valid"]:
+            print(f"\nBackup is valid:")
+            print(f"  Table: {result['table']}")
+            print(f"  Rows: {result['row_count']}")
+            print(f"  Created: {result['timestamp']}")
+        else:
+            print(f"\nBackup is INVALID: {result['error']}")
+    
+    elif args.restore:
+        confirm = input(f"Restore from {args.restore}? This will replace current data. (yes/no): ")
+        if confirm.lower() == "yes":
+            count = restore_backup(args.restore)
+            print(f"\nRestored {count} rows.")
+        else:
+            print("Restore cancelled.")
     
     else:
-        backup_file = create_backup(args.output, args.compress)
+        backup_file = create_backup(args.output)
         print(f"\nBackup successful: {backup_file}")
