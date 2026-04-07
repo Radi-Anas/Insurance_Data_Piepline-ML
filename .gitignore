@@ -6,3 +6,4 @@ __pycache__/
 debug_*.py
 *_debug.html
 data/clean/
+logs/

@@ -43,7 +43,7 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# SCRAPER MODE (FIXED)
+# SCRAPER MODE 
 # ---------------------------------------------------------------------------
 
 def transform_scraped(df: pd.DataFrame) -> pd.DataFrame:
@@ -74,7 +74,6 @@ def transform_scraped(df: pd.DataFrame) -> pd.DataFrame:
     df = df[df["price"].notna()]
     df = df[df["price"] > 0]
 
-    # ⚠️ RELAXED RULES (don’t kill everything)
     df = df[df["price"] < 100_000_000]
 
     dropped_price = before_price - len(df)
