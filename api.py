@@ -14,19 +14,25 @@ Endpoints:
     GET  /predictions         - Prediction history
     GET  /stats               - Fraud statistics
     GET  /claims              - List claims
+
+Authentication:
+    Set API_KEY in .env for protected endpoints.
+    Use header: X-API-Key: your_key
 """
 
 from typing import Optional, List
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from functools import lru_cache
 import pandas as pd
 from sqlalchemy import create_engine, text
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import json
+import hashlib
 
-from config.settings import DATABASE_URL
+from config.settings import DATABASE_URL, APP_CONFIG
 
 # Structured logging
 logging.basicConfig(
@@ -44,6 +50,55 @@ def log_request(endpoint: str, params: dict = None):
 def log_error(endpoint: str, error: str):
     """Log API error in structured format."""
     logger.error(json.dumps({"endpoint": endpoint, "error": error}))
+
+
+# API Key Authentication
+import os
+API_KEY = os.getenv("API_KEY", "")
+
+
+def verify_api_key(x_api_key: str = Header(None)):
+    """Verify API key for protected endpoints."""
+    if not API_KEY:
+        return None
+    
+    if x_api_key is None:
+        raise HTTPException(status_code=401, detail="Missing API key")
+    
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid API key")
+    
+    return x_api_key
+
+
+# Simple in-memory cache
+class Cache:
+    """Simple TTL cache for API responses."""
+    
+    def __init__(self, ttl_seconds: int = 300):
+        self.cache = {}
+        self.ttl = timedelta(seconds=ttl_seconds)
+    
+    def get(self, key: str):
+        """Get value from cache if not expired."""
+        if key in self.cache:
+            value, expiry = self.cache[key]
+            if datetime.now() < expiry:
+                return value
+            del self.cache[key]
+        return None
+    
+    def set(self, key: str, value):
+        """Set value in cache with TTL."""
+        expiry = datetime.now() + self.ttl
+        self.cache[key] = (value, expiry)
+    
+    def clear(self):
+        """Clear all cache."""
+        self.cache = {}
+
+
+cache = Cache(ttl_seconds=300)
 
 app = FastAPI(
     title="Insurance Claims Fraud API",
@@ -222,8 +277,10 @@ def predict_batch(claims: List[dict]) -> dict:
 
 
 @app.get("/model/metrics")
-def get_model_metrics() -> dict:
-    """Get model performance metrics."""
+def get_model_metrics(x_api_key: str = Header(None)) -> dict:
+    """Get model performance metrics (requires API key if configured)."""
+    verify_api_key(x_api_key)
+    
     try:
         model_data = get_model()
         if model_data is None:
@@ -257,8 +314,10 @@ def get_model_metrics() -> dict:
 def get_predictions(
     limit: int = Query(50, ge=1, le=100),
     fraud_only: bool = Query(False, description="Filter to fraud predictions only"),
+    x_api_key: str = Header(None),
 ) -> dict:
-    """Get prediction history."""
+    """Get prediction history (requires API key if configured)."""
+    verify_api_key(x_api_key)
     global prediction_history
     
     filtered = prediction_history
@@ -274,7 +333,13 @@ def get_predictions(
 
 @app.get("/stats")
 def get_stats() -> dict:
-    """Get fraud statistics."""
+    """Get fraud statistics (cached for 5 minutes)."""
+    # Check cache
+    cache_key = "stats"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
     try:
         engine = get_db_connection()
         
@@ -290,13 +355,18 @@ def get_stats() -> dict:
         
         engine.dispose()
         
-        return {
+        result = {
             "total_claims": int(df.iloc[0]["total_claims"]),
             "fraud_count": int(df.iloc[0]["fraud_count"]),
             "fraud_rate_percent": float(df.iloc[0]["fraud_rate"]),
             "avg_claim_amount": float(df.iloc[0]["avg_claim_amount"]),
             "avg_premium": float(df.iloc[0]["avg_premium"]),
         }
+        
+        # Cache result
+        cache.set(cache_key, result)
+        
+        return result
     
     except Exception as e:
         logger.error(f"Error fetching stats: {e}")
