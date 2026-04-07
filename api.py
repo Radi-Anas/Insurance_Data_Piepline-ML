@@ -19,15 +19,31 @@ Endpoints:
 from typing import Optional, List
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import pandas as pd
 from sqlalchemy import create_engine, text
 from datetime import datetime
 import logging
+import json
 
 from config.settings import DATABASE_URL
 
-logging.basicConfig(level=logging.INFO)
+# Structured logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='{"time": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s"}'
+)
 logger = logging.getLogger(__name__)
+
+
+def log_request(endpoint: str, params: dict = None):
+    """Log API request in structured format."""
+    logger.info(json.dumps({"endpoint": endpoint, "params": params}))
+
+
+def log_error(endpoint: str, error: str):
+    """Log API error in structured format."""
+    logger.error(json.dumps({"endpoint": endpoint, "error": error}))
 
 app = FastAPI(
     title="Insurance Claims Fraud API",

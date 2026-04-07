@@ -2,7 +2,7 @@
 claims_etl.py
 ETL pipeline for insurance claims data.
 
-Extracts → Transforms → Loads claims data to PostgreSQL.
+Extracts → Transforms → Validates → Loads claims data to PostgreSQL.
 
 Usage:
     python -c "from claims_etl import run_etl; run_etl()"
@@ -13,6 +13,7 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine, text
 from config.settings import DATABASE_URL
+from typing import List, Dict, Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,6 +22,25 @@ logger = logging.getLogger(__name__)
 RAW_DATA_PATH = "data/raw/insurance_claims.csv"
 CLEAN_DATA_PATH = "data/clean/claims_clean.csv"
 TABLE_NAME = "claims"
+
+# Data quality rules
+REQUIRED_COLUMNS = [
+    'policy_number', 'age', 'months_as_customer', 'policy_state',
+    'policy_annual_premium', 'total_claim_amount', 'is_fraud'
+]
+
+NUMERIC_VALIDATION = {
+    'age': {'min': 18, 'max': 100},
+    'months_as_customer': {'min': 0, 'max': 500},
+    'policy_annual_premium': {'min': 0, 'max': 100000},
+    'total_claim_amount': {'min': 0, 'max': 1000000},
+}
+
+CATEGORICAL_VALUES = {
+    'policy_state': ['Oh', 'In', 'Il', 'Pa', 'Ny'],
+    'insured_sex': ['M', 'F'],
+    'incident_severity': ['Trivial Damage', 'Minor Damage', 'Major Damage', 'Total Loss'],
+}
 
 
 def extract_from_csv(file_path: str) -> pd.DataFrame:
@@ -42,6 +62,61 @@ def get_engine():
     except Exception as e:
         logger.error(f"Failed to connect to database: {e}")
         raise
+
+
+def validate_data(df: pd.DataFrame) -> Dict[str, List[str]]:
+    """
+    Validate data quality and return list of issues.
+    
+    Returns:
+        dict with validation issues
+    """
+    issues = {}
+    
+    # Check required columns
+    missing_cols = [c for c in REQUIRED_COLUMNS if c not in df.columns]
+    if missing_cols:
+        issues['missing_columns'] = missing_cols
+    
+    # Validate numeric ranges
+    for col, constraints in NUMERIC_VALIDATION.items():
+        if col in df.columns:
+            violations = df[
+                (df[col] < constraints['min']) | 
+                (df[col] > constraints['max'])
+            ]
+            if len(violations) > 0:
+                issues[f'{col}_out_of_range'] = f"{len(violations)} rows out of range [{constraints['min']}, {constraints['max']}]"
+    
+    # Validate categorical values
+    for col, valid_values in CATEGORICAL_VALUES.items():
+        if col in df.columns:
+            invalid = df[~df[col].isin(valid_values + ['Unknown'])]
+            if len(invalid) > 0:
+                issues[f'{col}_invalid_values'] = f"{len(invalid)} rows with invalid values"
+    
+    # Check for duplicates
+    if 'policy_number' in df.columns:
+        dupes = df['policy_number'].duplicated().sum()
+        if dupes > 0:
+            issues['duplicates'] = f"{dupes} duplicate policy numbers"
+    
+    return issues
+
+
+def validate_and_raise(df: pd.DataFrame) -> None:
+    """Validate data and raise exception if critical issues found."""
+    issues = validate_data(df)
+    
+    critical_issues = ['missing_columns']
+    
+    found_critical = [i for i in critical_issues if i in issues]
+    if found_critical:
+        raise ValueError(f"Critical validation issues: {issues}")
+    
+    # Log warnings for non-critical
+    if issues:
+        logger.warning(f"Validation warnings: {issues}")
 
 
 def transform_claims(df: pd.DataFrame) -> pd.DataFrame:
@@ -159,7 +234,7 @@ def load_to_postgres(df: pd.DataFrame, table_name: str = "claims") -> int:
         engine.dispose()
 
 
-def run_etl(mode: str = "full") -> dict:
+def run_etl(mode: str = "full", validate: bool = True) -> dict:
     """
     Run the complete ETL pipeline.
     
@@ -188,6 +263,10 @@ def run_etl(mode: str = "full") -> dict:
             
             # Transform
             clean_df = transform_claims(raw_df)
+            
+            # Validate
+            if validate:
+                validate_and_raise(clean_df)
             
             # Save clean CSV
             clean_df.to_csv(CLEAN_DATA_PATH, index=False)
