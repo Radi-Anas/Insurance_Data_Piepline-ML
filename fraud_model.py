@@ -300,6 +300,28 @@ def predict_fraud(claim_data: dict, model_data: dict = None) -> dict:
     proba = model.predict_proba(X)[0, 1]
     prediction = int(proba >= FRAUD_THRESHOLD)
     
+    # Decision logging - explain WHY prediction was made
+    logger.info(f"Prediction made: is_fraud={prediction}, probability={proba:.3f}")
+    
+    # Get feature importance for this prediction
+    if hasattr(model, 'feature_importances_'):
+        importances = pd.DataFrame({
+            'feature': features,
+            'importance': model.feature_importances_
+        }).sort_values('importance', ascending=False)
+        
+        top_5_features = importances.head(5)['feature'].tolist()
+        logger.info(f"Top 5 influential features: {top_5_features}")
+        
+        # Log key feature values for fraud indicators
+        key_features = {
+            'no_witness_injury': X.get('no_witness_injury', [0])[0],
+            'claim_to_premium_ratio': X.get('claim_to_premium_ratio', [0])[0],
+            'incident_severity': X.get('incident_severity', ['Unknown'])[0],
+            'total_claim_amount': X.get('total_claim_amount', [0])[0],
+        }
+        logger.info(f"Key feature values: {key_features}")
+    
     return {
         'is_fraud': prediction,
         'fraud_probability': round(proba, 3),

@@ -196,6 +196,74 @@ docker-compose up -d
 # - dashboard:8501
 ```
 
+### Manual Docker Build
+
+```bash
+# Build image
+docker build -t fraud-detection .
+
+# Run container
+docker run -p 8000:8000 -p 8501:8501 fraud-detection
+```
+
+---
+
+## Deployment
+
+### Environment Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ENV` | Environment (development/staging/production) | development |
+| `DATABASE_URL` | PostgreSQL connection string | postgresql://... |
+| `API_KEY` | API key for protected endpoints | (none) |
+| `LOG_LEVEL` | Logging level (DEBUG/INFO/WARNING) | INFO |
+
+### Production Checklist
+
+- [ ] Set `ENV=production` in environment
+- [ ] Use strong `API_KEY` (generate with `openssl rand -hex 32`)
+- [ ] Configure `DATABASE_URL` to production PostgreSQL
+- [ ] Set `LOG_LEVEL=WARNING` to reduce log volume
+- [ ] Use reverse proxy (nginx) for SSL termination
+- [ ] Set up monitoring (Prometheus/Grafana)
+- [ ] Configure automated backups
+
+### Running in Production
+
+```bash
+# With docker-compose
+ENV=production DATABASE_URL=postgresql://... docker-compose up -d
+
+# Or with environment file
+cp .env.production .env
+# Edit .env with production values
+docker-compose up -d
+```
+
+---
+
+## Testing
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# With coverage
+pytest tests/ --cov=. --cov-report=html
+
+# Run specific test file
+pytest tests/test_fraud_model.py -v
+```
+
+### Test Coverage
+
+| Module | Tests | Description |
+|--------|-------|-------------|
+| claims_etl.py | 14 | ETL transformation, validation |
+| fraud_model.py | 22 | Model training, prediction |
+| api.py | ~10 | Endpoint testing |
+
 ---
 
 ## What's Included
