@@ -82,20 +82,21 @@ def train_model(X: pd.DataFrame, y: np.ndarray) -> dict:
         from xgboost import XGBClassifier
         
         # Calculate scale_pos_weight for imbalanced data
-        # ratio of negative to positive samples
         scale_pos_weight = (y_train == 0).sum() / (y_train == 1).sum()
         
         model = XGBClassifier(
-            n_estimators=150,
-            max_depth=6,
-            learning_rate=0.05,
-            scale_pos_weight=scale_pos_weight,  # Handle imbalanced data
-            min_child_weight=3,
+            n_estimators=200,
+            max_depth=5,
+            learning_rate=0.03,
+            scale_pos_weight=scale_pos_weight * 1.5,  # Boost recall
+            min_child_weight=2,
             subsample=0.8,
             colsample_bytree=0.8,
+            gamma=0.1,
+            reg_alpha=0.5,
+            reg_lambda=1.0,
             random_state=42,
-            eval_metric='auc',
-            use_label_encoder=False
+            eval_metric='auc'
         )
     except ImportError:
         from sklearn.ensemble import RandomForestClassifier
@@ -211,14 +212,18 @@ def predict_fraud(claim_data: dict, model_data: dict = None) -> dict:
             X[col] = X[col].apply(lambda x: x if x in known_labels else le.classes_[0])
             X[col] = le.transform(X[col].astype(str))
     
-    # Predict
+    # Predict with optimized threshold
+    # Lower threshold = higher recall (catch more fraud)
+    # Higher threshold = higher precision (fewer false positives)
+    FRAUD_THRESHOLD = 0.35  # Lowered to catch more fraud
+    
     proba = model.predict_proba(X)[0, 1]
-    prediction = int(proba >= 0.5)
+    prediction = int(proba >= FRAUD_THRESHOLD)
     
     return {
         'is_fraud': prediction,
         'fraud_probability': round(proba, 3),
-        'confidence': 'high' if proba > 0.8 or proba < 0.2 else 'medium'
+        'confidence': 'high' if proba > 0.75 or proba < 0.25 else 'medium'
     }
 
 
