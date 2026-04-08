@@ -44,7 +44,7 @@ def load_data() -> pd.DataFrame:
 def prepare_features(df: pd.DataFrame):
     """
     Prepare features for model training.
-    Handles categorical encoding and feature selection.
+    Handles categorical encoding, feature engineering, and selection.
     """
     # Target
     y = df['is_fraud'].values
@@ -53,6 +53,39 @@ def prepare_features(df: pd.DataFrame):
     drop_cols = ['is_fraud', 'policy_number']  # policy_number is unique ID
     feature_cols = [c for c in df.columns if c not in drop_cols]
     X = df[feature_cols].copy()
+    
+    # Feature Engineering - create interaction features
+    if 'total_claim_amount' in X.columns and 'policy_annual_premium' in X.columns:
+        # Claim to premium ratio
+        X['claim_to_premium_ratio'] = X['total_claim_amount'] / (X['policy_annual_premium'] + 1)
+    
+    if 'vehicle_claim' in X.columns and 'property_claim' in X.columns:
+        # Vehicle vs property damage
+        X['vehicle_property_ratio'] = X['vehicle_claim'] / (X['property_claim'] + 1)
+    
+    if 'injury_claim' in X.columns and 'total_claim_amount' in X.columns:
+        # Injury severity
+        X['injury_ratio'] = X['injury_claim'] / (X['total_claim_amount'] + 1)
+    
+    if 'age' in X.columns and 'months_as_customer' in X.columns:
+        # Customer tenure relative to age
+        X['tenure_age_ratio'] = X['months_as_customer'] / (X['age'] * 12 + 1)
+    
+    if 'bodily_injuries' in X.columns and 'witnesses' in X.columns:
+        # Injuries without witnesses (potential fraud indicator)
+        X['no_witness_injury'] = ((X['bodily_injuries'] > 0) & (X['witnesses'] == 0)).astype(int)
+    
+    if 'number_of_vehicles_involved' in X.columns and 'witnesses' in X.columns:
+        # Complex incident without witnesses
+        X['complex_no_witness'] = ((X['number_of_vehicles_involved'] > 1) & (X['witnesses'] == 0)).astype(int)
+    
+    if 'policy_deductable' in X.columns and 'total_claim_amount' in X.columns:
+        # Deductible to claim ratio
+        X['deductible_claim_ratio'] = X['policy_deductable'] / (X['total_claim_amount'] + 1)
+    
+    if 'capital-gains' in X.columns and 'capital-loss' in X.columns:
+        # Net capital
+        X['net_capital'] = X['capital-gains'] - X['capital-loss']
     
     # Encode categorical columns
     label_encoders = {}
@@ -63,7 +96,7 @@ def prepare_features(df: pd.DataFrame):
         X[col] = le.fit_transform(X[col].astype(str))
         label_encoders[col] = le
     
-    return X, y, label_encoders, feature_cols
+    return X, y, label_encoders, list(X.columns)
 
 
 def train_model(X: pd.DataFrame, y: np.ndarray) -> dict:
@@ -80,27 +113,74 @@ def train_model(X: pd.DataFrame, y: np.ndarray) -> dict:
     # Try XGBoost, fall back to sklearn if not available
     try:
         from xgboost import XGBClassifier
+        from sklearn.model_selection import cross_val_score
         
         # Calculate scale_pos_weight for imbalanced data
         scale_pos_weight = (y_train == 0).sum() / (y_train == 1).sum()
         
-        model = XGBClassifier(
-            n_estimators=200,
+        # Create ensemble of models
+        from sklearn.ensemble import VotingClassifier
+        
+        # XGBoost with different settings
+        xgb_1 = XGBClassifier(
+            n_estimators=150,
             max_depth=5,
             learning_rate=0.03,
-            scale_pos_weight=scale_pos_weight * 1.5,  # Boost recall
+            scale_pos_weight=scale_pos_weight * 1.3,
             min_child_weight=2,
             subsample=0.8,
             colsample_bytree=0.8,
             gamma=0.1,
-            reg_alpha=0.5,
+            reg_alpha=0.3,
             reg_lambda=1.0,
             random_state=42,
             eval_metric='auc'
         )
+        
+        xgb_2 = XGBClassifier(
+            n_estimators=100,
+            max_depth=4,
+            learning_rate=0.05,
+            scale_pos_weight=scale_pos_weight * 1.5,
+            min_child_weight=3,
+            subsample=0.7,
+            colsample_bytree=0.7,
+            gamma=0.2,
+            reg_alpha=0.5,
+            reg_lambda=1.5,
+            random_state=123,
+            eval_metric='auc'
+        )
+        
+        # RandomForest
+        from sklearn.ensemble import RandomForestClassifier
+        class_weight = {0: 1, 1: scale_pos_weight}
+        rf = RandomForestClassifier(
+            n_estimators=100,
+            max_depth=10,
+            class_weight=class_weight,
+            random_state=42,
+            n_jobs=-1
+        )
+        
+        # Voting ensemble (soft voting for probability-based)
+        model = VotingClassifier(
+            estimators=[
+                ('xgb1', xgb_1),
+                ('xgb2', xgb_2),
+                ('rf', rf)
+            ],
+            voting='soft',
+            n_jobs=-1
+        )
+        
+        # Cross-validation
+        cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='roc_auc')
+        logger.info(f"Cross-validation AUC: {cv_scores.mean():.3f} (+/- {cv_scores.std():.3f})")
+        
     except ImportError:
         from sklearn.ensemble import RandomForestClassifier
-        logger.warning("XGBoost not available, using RandomForest with class_weight")
+        logger.warning("Using RandomForest with class_weight")
         
         # Calculate class weight for imbalanced data
         class_weight = {0: 1, 1: (y_train == 0).sum() / (y_train == 1).sum()}

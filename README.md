@@ -54,14 +54,16 @@ Insurance fraud costs companies billions annually. When a claim comes in, invest
 
 | Metric | Value | Why It Matters |
 |--------|-------|-----------------|
-| Accuracy | 80% | Overall correctness |
-| AUC-ROC | 0.794 | Strong ranking ability |
-| Precision | 57% | When we say fraud, 57% actually are fraud |
-| Recall | 65% | We catch 65% of actual fraud |
+| Accuracy | 81.5% | Overall correctness |
+| AUC-ROC | 0.805 | Strong ranking ability |
+| Precision | 60% | When we say fraud, 60% actually are fraud |
+| Recall | 71% | We catch 71% of actual fraud |
 
 **Improvements:**
-- Using XGBoost with scale_pos_weight for imbalanced data
-- Optimized threshold (0.35) for better fraud detection
+- Using ensemble (XGBoost x2 + RandomForest) with voting
+- Added feature engineering (8 new derived features)
+- Cross-validation for reliable performance estimation
+- Features like `no_witness_injury`, `claim_to_premium_ratio`
 - Regularization (gamma, reg_alpha, reg_lambda) to prevent overfitting
 
 ---
