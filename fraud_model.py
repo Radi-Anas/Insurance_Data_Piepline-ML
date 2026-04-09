@@ -274,10 +274,36 @@ def predict_fraud(claim_data: dict, model_data: dict = None) -> dict:
     # Create DataFrame with same columns
     df = pd.DataFrame([claim_data])
     
-    # Ensure all feature columns exist
+    # Ensure all feature columns exist (fill missing with 0)
     for col in features:
         if col not in df.columns:
             df[col] = 0
+    
+    # RECREATE the same feature engineering as during training
+    if 'total_claim_amount' in df.columns and 'policy_annual_premium' in df.columns:
+        df['claim_to_premium_ratio'] = df['total_claim_amount'] / (df['policy_annual_premium'] + 1)
+    
+    if 'vehicle_claim' in df.columns and 'property_claim' in df.columns:
+        df['vehicle_property_ratio'] = df['vehicle_claim'] / (df['property_claim'] + 1)
+    
+    if 'injury_claim' in df.columns and 'total_claim_amount' in df.columns:
+        df['injury_ratio'] = df['injury_claim'] / (df['total_claim_amount'] + 1)
+    
+    if 'age' in df.columns and 'months_as_customer' in df.columns:
+        df['tenure_age_ratio'] = df['months_as_customer'] / (df['age'] * 12 + 1)
+    
+    # THIS IS THE KEY ONE - no_witness_injury
+    if 'bodily_injuries' in df.columns and 'witnesses' in df.columns:
+        df['no_witness_injury'] = ((df['bodily_injuries'] > 0) & (df['witnesses'] == 0)).astype(int)
+    
+    if 'number_of_vehicles_involved' in df.columns and 'witnesses' in df.columns:
+        df['complex_no_witness'] = ((df['number_of_vehicles_involved'] > 1) & (df['witnesses'] == 0)).astype(int)
+    
+    if 'policy_deductable' in df.columns and 'total_claim_amount' in df.columns:
+        df['deductible_claim_ratio'] = df['policy_deductable'] / (df['total_claim_amount'] + 1)
+    
+    if 'capital-gains' in df.columns and 'capital-loss' in df.columns:
+        df['net_capital'] = df['capital-gains'] - df['capital-loss']
     
     # Select only features the model was trained on
     X = df[features].copy()
