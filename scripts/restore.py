@@ -16,7 +16,7 @@ import logging
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from config.settings import DB_CONFIG
+from configs.settings import DB_CONFIG
 from scripts.backup import list_backups
 
 logging.basicConfig(level=logging.INFO)
@@ -90,7 +90,7 @@ def verify_restore() -> dict:
         Dictionary with verification results
     """
     from sqlalchemy import create_engine, text
-    from config.settings import DATABASE_URL
+    from configs.settings import DATABASE_URL
     
     engine = create_engine(DATABASE_URL)
     

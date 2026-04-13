@@ -351,8 +351,84 @@ def predict_fraud(claim_data: dict, model_data: dict = None) -> dict:
     return {
         'is_fraud': prediction,
         'fraud_probability': round(proba, 3),
-        'confidence': 'high' if proba > 0.75 or proba < 0.25 else 'medium'
+        'confidence': 'high' if proba > 0.75 or proba < 0.25 else 'medium',
+        'shap_values': get_shap_explanation(X, model, features),
     }
+
+
+def get_shap_explanation(X: pd.DataFrame, model, features: list) -> dict:
+    """
+    Compute SHAP values to explain a prediction.
+    
+    Returns feature contributions to the prediction.
+    """
+    try:
+        import shap
+        
+        # Use TreeExplainer for tree-based models
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X)
+        
+        # Get feature contributions for this prediction
+        if isinstance(shap_values, list):
+            # For binary classification, get fraud class (index 1)
+            shap_vals = shap_values[1][0] if len(shap_values) > 1 else shap_values[0][0]
+        else:
+            shap_vals = shap_values[0]
+        
+        # Create feature importance ranking
+        feature_contributions = pd.DataFrame({
+            'feature': features,
+            'contribution': shap_vals
+        }).sort_values('contribution', key=abs, ascending=False)
+        
+        top_features = []
+        for _, row in feature_contributions.head(5).iterrows():
+            direction = "increases" if row['contribution'] > 0 else "decreases"
+            top_features.append(f"{row['feature']}: {direction} fraud risk")
+        
+        return {
+            'top_features': top_features,
+            'prediction_explanation': feature_contributions.head(3).to_dict('records')
+        }
+    except ImportError:
+        return {'error': 'SHAP not installed'}
+    except Exception as e:
+        return {'error': str(e)}
+
+
+def compute_global_shap_importance(model_data: dict, X: pd.DataFrame) -> dict:
+    """
+    Compute global SHAP importance for all predictions.
+    
+    Useful for understanding model's decision-making globally.
+    """
+    try:
+        import shap
+        
+        model = model_data['model']
+        features = model_data['features']
+        
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X)
+        
+        if isinstance(shap_values, list):
+            shap_vals = shap_values[1] if len(shap_values) > 1 else shap_values[0]
+        else:
+            shap_vals = shap_values
+        
+        # Average absolute SHAP values
+        global_importance = pd.DataFrame({
+            'feature': features,
+            'importance': np.abs(shap_vals).mean(axis=0)
+        }).sort_values('importance', ascending=False)
+        
+        return {
+            'global_importance': global_importance.head(10).to_dict('records'),
+            'mean_abs_shap': float(np.abs(shap_vals).mean())
+        }
+    except Exception as e:
+        return {'error': str(e)}
 
 
 def print_evaluation(results: dict):

@@ -9,7 +9,7 @@ import sys
 # Add project to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from config.settings import DATABASE_URL
+from configs.settings import DATABASE_URL
 from alembic.ini import Base
 
 config = context.config

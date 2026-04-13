@@ -17,12 +17,12 @@ import subprocess
 import sys
 import os
 
-from pipeline.logging_config import setup_logging
+from src.pipelines.logging_config import setup_logging
 
 setup_logging()
 
-from claims_etl import run_etl
-from fraud_model import main as train_model
+from src.data.ingestion.claims_etl import run_etl
+from src.models.fraud_model import main as train_model
 
 logger = logging.getLogger(__name__)
 
@@ -57,13 +57,13 @@ def start_services():
     logger.info("Starting services...")
     
     dashboard_proc = subprocess.Popen(
-        [sys.executable, "-m", "streamlit", "run", "dashboard.py", "--server.port", "8501"],
+        [sys.executable, "-m", "streamlit", "run", "src/services/dashboard.py", "--server.port", "8501"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
     
     api_proc = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"],
+        [sys.executable, "-m", "uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )

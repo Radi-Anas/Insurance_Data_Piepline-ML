@@ -18,7 +18,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from sqlalchemy import create_engine, text
-from config.settings import DATABASE_URL
+from configs.settings import DATABASE_URL
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

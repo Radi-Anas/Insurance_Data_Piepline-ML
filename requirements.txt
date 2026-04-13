@@ -9,6 +9,10 @@ pytz==2024.1
 # ML
 scikit-learn==1.5.0
 joblib==1.4.2
+xgboost==2.0.3
+
+# Explainability
+shap==0.44.1
 
 # API & Dashboard
 fastapi==0.115.0
@@ -19,6 +23,7 @@ slowapi==0.1.9
 
 # Caching
 cachetools==5.3.3
+redis==5.0.1
 
 # Logging
 loguru==0.7.2
