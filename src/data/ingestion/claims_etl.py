@@ -216,7 +216,7 @@ def load_to_postgres(df: pd.DataFrame, table_name: str = "claims") -> int:
     logger.info(f"Loading {len(df)} rows to '{table_name}'...")
     
     # Ensure numeric types
-    for col in ['policy_number', 'policy_deductable', 'months_as_customer', 'age',
+    for col in ['policy_deductable', 'months_as_customer', 'age',
                 'policy_annual_premium', 'capital-gains', 'capital-loss',
                 'incident_hour_of_the_day', 'number_of_vehicles_involved',
                 'bodily_injuries', 'witnesses', 'total_claim_amount',
