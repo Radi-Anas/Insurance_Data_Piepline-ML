@@ -35,7 +35,8 @@ random.seed(42)
 
 def generate_policy_number():
     """Generate unique policy number."""
-    return f"POL{''.join([str(random.randint(0, 9)) for _ in range(8)]}"
+    nums = ''.join([str(random.randint(0, 9)) for _ in range(8)])
+    return f"POL{nums}"
 
 
 def generate_customer_data(n_samples: int, fraud_rate: float = 0.24) -> pd.DataFrame:
@@ -108,21 +109,26 @@ def inject_fraud_patterns(df: pd.DataFrame, fraud_rate: float = 0.24) -> pd.Data
     Inject fraud patterns to make detection realistic.
     These patterns mimic real fraud indicators.
     """
-    n_fraud = int(len(df) * fraud_rate)
-    fraud_indices = np.random.choice(len(df), n_fraud, replace=False)
+    is_fraud = df['fraud_reported'] == 'Y'
     
-    # Make certain features correlate with fraud
-    for idx in fraud_indices:
-        # High claim relative to premium
-        df.loc[idx, 'total_claim_amount'] = df.loc[idx, 'policy_annual_premium'] * np.random.uniform(3, 8)
-        
-        # New customer + high claim = suspicious
-        if df.loc[idx, 'months_as_customer'] < 12:
-            df.loc[idx, 'total_claim_amount'] *= np.random.uniform(1.5, 3)
-        
-        # No witness + bodily injuries = very suspicious
-        if df.loc[idx, 'bodily_injuries'] > 0 and df.loc[idx, 'witnesses'] == 0:
-            df.loc[idx, 'total_claim_amount'] *= np.random.uniform(1.2, 2)
+    # Pattern 1: No witness + injury (fraud indicator)
+    mask1 = is_fraud & (np.random.random(len(df)) < 0.6)
+    df.loc[mask1, 'witnesses'] = 0
+    
+    # Pattern 2: High claim to premium ratio (fraud)
+    mask2 = is_fraud & (np.random.random(len(df)) < 0.7)
+    multiplier = np.where(mask2, np.random.uniform(4, 10, len(df)), 1)
+    df['total_claim_amount'] = df['total_claim_amount'] * multiplier
+    
+    # Pattern 3: New customers with fraud
+    mask3 = is_fraud & (np.random.random(len(df)) < 0.5)
+    new_tenure = np.where(mask3, np.random.randint(0, 12, len(df)), df['months_as_customer'])
+    df['months_as_customer'] = new_tenure
+    
+    # Pattern 4: Nighttime incidents (more suspicious for fraud)
+    mask4 = is_fraud & (np.random.random(len(df)) < 0.4)
+    hours = np.where(mask4, np.random.randint(22, 24, len(df)), df['incident_hour_of_the_day'])
+    df['incident_hour_of_the_day'] = hours
     
     return df
 
@@ -195,10 +201,6 @@ def augment_original_data(original_df: pd.DataFrame, target_size: int = 10000) -
     
     logger.info(f"Augmented to {len(df)} samples")
     return df
-
-
-# Remove policy number duplicates from augmentation
-df = df.drop_duplicates(subset=['policy_number'], keep='first')
 
 
 if __name__ == "__main__":
