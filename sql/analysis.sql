@@ -24,7 +24,7 @@ SELECT
     policy_state,
     COUNT(*) AS total_claims,
     SUM(CASE WHEN is_fraud = 1 THEN 1 ELSE 0 END) AS fraud_count,
-    ROUND(AVG(total_claim_amount), 2) AS avg_claim_amount
+    ROUND(AVG(total_claim_amount)::NUMERIC, 2) AS avg_claim_amount
 FROM claims
 GROUP BY policy_state
 ORDER BY fraud_count DESC;
@@ -55,9 +55,9 @@ ORDER BY fraud_rate DESC;
 SELECT 
     is_fraud,
     COUNT(*) AS claim_count,
-    ROUND(AVG(total_claim_amount), 2) AS avg_claim_amount,
-    ROUND(AVG(policy_annual_premium), 2) AS avg_premium,
-    ROUND(AVG(months_as_customer), 2) AS avg_tenure_months
+    ROUND(AVG(total_claim_amount)::NUMERIC, 2) AS avg_claim_amount,
+    ROUND(AVG(policy_annual_premium)::NUMERIC, 2) AS avg_premium,
+    ROUND(AVG(months_as_customer)::NUMERIC, 2) AS avg_tenure_months
 FROM claims
 GROUP BY is_fraud;
 
@@ -85,7 +85,7 @@ SELECT
     incident_type,
     COUNT(*) AS total_claims,
     SUM(CASE WHEN is_fraud = 1 THEN 1 ELSE 0 END) AS fraud_count,
-    ROUND(AVG(total_claim_amount), 2) AS avg_claim_amount
+    ROUND(AVG(total_claim_amount)::NUMERIC, 2) AS avg_claim_amount
 FROM claims
 GROUP BY incident_type
 ORDER BY fraud_count DESC;
