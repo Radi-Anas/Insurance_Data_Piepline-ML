@@ -1,6 +1,6 @@
 """
 conftest.py
-Pytest fixtures for pipeline tests.
+Pytest fixtures for insurance fraud detection pipeline tests.
 """
 
 import pandas as pd
@@ -8,54 +8,72 @@ import pytest
 
 
 @pytest.fixture
-def sample_raw_df():
-    """Sample raw DataFrame mimicking scraper output."""
+def sample_claim_df():
+    """Sample raw insurance claim DataFrame."""
     return pd.DataFrame({
-        "title": [
-            "Appartement à Casablanca",
-            "Villa à Marrakech",
-            "Studio à Rabat",
+        "policy_number": ["POL12345678", "POL87654321", "POL11223344"],
+        "months_as_customer": [24, 6, 120],
+        "age": [35, 28, 55],
+        "policy_state": ["OH", "NY", "IL"],
+        "policy_csl": ["250/500", "100/300", "500/1000"],
+        "policy_annual_premium": [1200.0, 800.0, 2000.0],
+        "insured_sex": ["M", "F", "M"],
+        "incident_type": [
+            "Single Vehicle Collision",
+            "Multi-Vehicle Collision",
+            "Vehicle Rollover"
         ],
-        "description": ["Desc 1", "Desc 2", "Desc 3"],
-        "price": ["1500000", "2500000", "500000"],
-        "currency": ["DH", "DH", "DH"],
-        "surface_m2": [85, 200, 35],
-        "listing_type": ["Vente", "Vente", "Location"],
-        "seller_name": ["Particulier", "Agence", "Particulier"],
-        "city": ["casablanca", "marrakech", "rabat"],
-        "category": ["Appartements", "Villas", "Studios"],
-        "url": [
-            "https://avito.ma/casablanca/appart1",
-            "https://avito.ma/marrakech/villa1",
-            "https://avito.ma/rabat/studio1",
-        ],
+        "incident_severity": ["Minor Damage", "Major Damage", "Total Loss"],
+        "total_claim_amount": [5000.0, 15000.0, 25000.0],
+        "witnesses": [2, 0, 1],
+        "bodily_injuries": [0, 2, 1],
+        "auto_make": ["Toyota", "BMW", "Honda"],
+        "fraud_reported": ["N", "Y", "N"],
     })
 
 
 @pytest.fixture
-def sample_clean_df():
-    """Sample cleaned DataFrame ready for PostgreSQL."""
-    return pd.DataFrame({
-        "title": ["Appartement À Casablanca", "Villa À Marrakech"],
-        "price": [1500000.0, 2500000.0],
-        "city": ["Casablanca", "Marrakech"],
-        "surface_m2": [85, 200],
-        "url": [
-            "https://avito.ma/casablanca/appart1",
-            "https://avito.ma/marrakech/villa1",
-        ],
-        "price_per_m2": [17647.06, 12500.0],
-        "price_range": ["Mid-range", "Premium"],
-    })
+def sample_clean_claim():
+    """Sample cleaned claim data for prediction."""
+    return {
+        "months_as_customer": 24,
+        "age": 35,
+        "policy_state": "OH",
+        "policy_csl": "250/500",
+        "policy_annual_premium": 1200,
+        "incident_type": "Single Vehicle Collision",
+        "incident_severity": "Minor Damage",
+        "total_claim_amount": 5000,
+        "auto_make": "Toyota",
+        "witnesses": 2,
+        "bodily_injuries": 0,
+    }
 
 
 @pytest.fixture
-def dirty_df():
+def sample_high_risk_claim():
+    """Sample high fraud risk claim."""
+    return {
+        "months_as_customer": 3,
+        "age": 25,
+        "policy_state": "NY",
+        "policy_csl": "100/300",
+        "policy_annual_premium": 800,
+        "incident_type": "Multi-Vehicle Collision",
+        "incident_severity": "Major Damage",
+        "total_claim_amount": 15000,
+        "auto_make": "BMW",
+        "witnesses": 0,
+        "bodily_injuries": 2,
+    }
+
+
+@pytest.fixture
+def dirty_claim_df():
     """DataFrame with invalid/missing data."""
     return pd.DataFrame({
-        "title": ["Valid", "No Price", "Zero Surface", None],
-        "price": [1000000, "invalid", 500000, 750000],
-        "city": ["Casablanca", "Rabat", "Fes", "Agadir"],
-        "surface_m2": [80, 50, 0, 100],
-        "url": ["url1", "url2", "url3", "url4"],
+        "policy_number": [None, "POL123", "POL456"],
+        "age": [35, -5, 150],  # Invalid ages
+        "total_claim_amount": [5000, None, -1000],  # Invalid amounts
+        "witnesses": [0, 0, 10],  # Unrealistic witness count
     })

@@ -178,7 +178,7 @@ full_pipeline_schedule = Schedule(
 def deploy():
     """Deploy pipelines to Prefect."""
     from prefect.deployments import Deployment
-    from prefect.infrastructure Docker
+    from prefect.infrastructure import Docker
     
     # Deploy ETL pipeline
     etl_deployment = Deployment.build_from_flow(
