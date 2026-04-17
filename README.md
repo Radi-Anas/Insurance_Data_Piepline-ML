@@ -18,7 +18,7 @@ Insurance fraud costs companies billions annually. When a claim comes in, invest
 ## Architecture Overview
 
 ```
-1. RAW DATA (CSV)
+1. RAW DATA (CSV) - 10,000 synthetic claims
    └── Insurance claims with customer, policy, incident details
 
 2. ETL PIPELINE (src/data/ingestion/)
@@ -28,11 +28,11 @@ Insurance fraud costs companies billions annually. When a claim comes in, invest
    └── Load: Insert into PostgreSQL with connection pooling
 
 3. DATABASE (PostgreSQL)
-   └── 1000 claims, indexed on fraud flag, severity, vehicle make
+   └── 10,000 claims, indexed on fraud flag, severity, vehicle make
    └── Connection pooling (5 connections, 10 overflow)
 
 4. ML MODEL (src/models/)
-   ├── Features: 29 columns + 14 engineered features
+   ├── Features: 36 columns + 14 engineered features
    ├── Target: is_fraud (binary)
    └── Training: XGBoost + RandomForest ensemble
 
@@ -40,7 +40,7 @@ Insurance fraud costs companies billions annually. When a claim comes in, invest
    ├── /predict: Single claim prediction
    ├── /stats: Aggregated fraud statistics
    ├── /health: System health check
-   └── Rate limiting: 5-10 requests/minute
+   └── Rate limiting: 10 requests/minute
 
 6. DASHBOARD (src/services/)
    ├── Overview: Fraud rate, severity charts
@@ -52,12 +52,14 @@ Insurance fraud costs companies billions annually. When a claim comes in, invest
 
 ## Model Performance
 
+Trained on 10,000 synthetic claims with learnable fraud patterns.
+
 | Metric | Value | Why It Matters |
 |--------|-------|----------------|
-| Accuracy | 81.5% | Overall correctness |
-| AUC-ROC | 0.805 | Strong ranking ability |
-| Precision | 60% | When we say fraud, 60% actually are fraud |
-| Recall | 72% | We catch 72% of actual fraud |
+| Accuracy | 91.7% | Overall correctness |
+| AUC-ROC | 0.958 | Excellent ranking ability |
+| Precision | 85%+ | When we say fraud, it usually is |
+| Recall | 80%+ | We catch most actual fraud |
 
 ### Feature Engineering
 
@@ -65,7 +67,7 @@ Created 14 domain-specific features based on fraud detection logic:
 
 | Feature | Formula | Why It Predicts Fraud |
 |---------|---------|----------------------|
-| `no_witness_injury` | bodily_injuries > 0 AND witnesses = 0 | **#1 predictor!** Injuries without witnesses are suspicious |
+| `no_witness_injury` | bodily_injuries > 0 AND witnesses = 0 | Injuries without witnesses are suspicious |
 | `claim_to_premium_ratio` | total_claim_amount / policy_annual_premium | High claim relative to premium = higher risk |
 | `vehicle_property_ratio` | vehicle_claim / property_claim | Unusual damage patterns |
 | `injury_ratio` | injury_claim / total_claim_amount | High injury portion may indicate exaggeration |
@@ -73,17 +75,6 @@ Created 14 domain-specific features based on fraud detection logic:
 | `complex_no_witness` | vehicles > 1 AND witnesses = 0 | Multi-vehicle accidents without witnesses |
 | `deductible_claim_ratio` | policy_deductable / total_claim_amount | Low deductible vs high claim |
 | `net_capital` | capital-gains - capital-loss | Financial stress indicator |
-
-### Why `no_witness_injury` is #1 Predictor
-
-**Domain Logic:**
-- Legitimate claims typically have witnesses (passengers, other drivers, police)
-- Fraudsters prefer scenarios where no one can contradict their story
-- Injuries without witnesses are 3x more likely to be fraudulent
-
-**Business Insight:**
-This feature directly answers: "Is anyone to corroborate this claim?"
-If answer is NO + injuries exist -> flag for review
 
 ---
 
@@ -93,7 +84,7 @@ If answer is NO + injuries exist -> flag for review
 |-----------|-------------|
 | Language | Python 3.10 |
 | Database | PostgreSQL |
-| ML | scikit-learn, XGBoost |
+| ML | scikit-learn, XGBoost, SHAP |
 | API | FastAPI |
 | Dashboard | Streamlit |
 | Scheduling | Prefect |
@@ -103,6 +94,7 @@ If answer is NO + injuries exist -> flag for review
 | Testing | pytest |
 | Containerization | Docker |
 | CI/CD | GitHub Actions |
+| Cloud | AWS ECS, Kubernetes |
 
 ---
 
@@ -111,33 +103,37 @@ If answer is NO + injuries exist -> flag for review
 ```
 .
 ├── src/
-│   ├── api/                    # FastAPI application
-│   │   └── app.py              # 8 endpoints, auth, rate limiting
+│   ├── api/
+│   │   └── app.py              # FastAPI with 8+ endpoints
 │   ├── data/
-│   │   ├── ingestion/          # ETL pipeline
-│   │   │   └── claims_etl.py
-│   │   ├── processing/        # dbt transformations
-│   │   │   └── transformations/
-│   │   └── validation/        # Great Expectations
-│   │       └── data_quality/
-│   ├── models/                 # ML models
-│   │   ├── fraud_model.py
+│   │   ├── ingestion/
+│   │   │   ├── claims_etl.py   # ETL pipeline
+│   │   │   └── synthetic_data.py # Data generator (10K rows)
+│   │   ├── processing/
+│   │   │   └── transformations/ # dbt models
+│   │   └── validation/
+│   │       └── data_quality/   # Great Expectations
+│   ├── models/
+│   │   ├── fraud_model.py      # ML model + SHAP
 │   │   ├── fraud_model.pkl
 │   │   └── label_encoders.pkl
-│   ├── pipelines/             # Orchestration
-│   │   ├── scheduler.py       # Prefect flows
-│   │   ├── incremental_etl.py # Watermark-based processing
+│   ├── pipelines/
+│   │   ├── scheduler.py        # Prefect orchestration
+│   │   ├── incremental_etl.py  # Watermark-based processing
 │   │   ├── schema_registry.py # Avro schemas
-│   │   └── lineage.py        # Data lineage tracking
-│   └── services/              # Dashboard
-│       └── dashboard.py
-├── configs/                   # Configuration
+│   │   ├── drift_detection.py # Data/concept drift monitoring
+│   │   ├── feature_store.py   # Redis-backed feature store
+│   │   └── lineage.py         # Data lineage tracking
+│   └── services/
+│       └── dashboard.py        # Streamlit dashboard
+├── configs/
 │   ├── settings.py
 │   └── params.yaml
-├── tests/                     # 56 unit tests
-├── migrations/               # Alembic database migrations
-├── sql/                      # SQL analysis
-├── scripts/                  # Backup/restore utilities
+├── tests/                      # 56+ unit tests
+├── migrations/                  # Alembic DB migrations
+├── scripts/                     # Backup/restore utilities
+├── k8s/                        # Kubernetes manifests
+├── aws/                        # AWS ECS deployment
 ├── docker-compose.yml
 ├── requirements.txt
 └── README.md
@@ -183,6 +179,7 @@ python main.py
 | `/predict/batch` | POST | Batch score claims (5/min limit) |
 | `/stats` | GET | Fraud statistics (cached) |
 | `/claims` | GET | List claims with filters |
+| `/features/{policy}` | GET | Get cached features |
 | `/model/metrics` | GET | Model performance (API key required) |
 | `/model/train` | POST | Retrain model (API key required) |
 
@@ -195,15 +192,38 @@ response = requests.post("http://localhost:8000/predict", json={
     "months_as_customer": 12,
     "age": 35,
     "policy_state": "OH",
+    "policy_csl": "250/500",
     "policy_annual_premium": 1200,
     "incident_type": "Single Vehicle Collision",
     "incident_severity": "Major Damage",
     "total_claim_amount": 5000,
-    "auto_make": "Toyota"
+    "auto_make": "Toyota",
+    "witnesses": 2,
+    "bodily_injuries": 0
 })
 
 print(response.json())
-# {"prediction": 1, "fraud_probability": 0.54, "confidence": "medium", "risk_level": "MEDIUM"}
+# {"prediction": 0, "fraud_probability": 0.14, "confidence": "high", "risk_level": "LOW"}
+```
+
+### High Fraud Risk Example
+
+```python
+response = requests.post("http://localhost:8000/predict", json={
+    "months_as_customer": 2,
+    "age": 25,
+    "policy_state": "NY",
+    "policy_csl": "100/300",
+    "policy_annual_premium": 800,
+    "incident_type": "Multi-Vehicle Collision",
+    "incident_severity": "Major Damage",
+    "total_claim_amount": 15000,
+    "auto_make": "BMW",
+    "witnesses": 0,
+    "bodily_injuries": 2
+})
+
+# {"prediction": 1, "fraud_probability": 0.85, "confidence": "high", "risk_level": "HIGH"}
 ```
 
 ---
@@ -214,32 +234,58 @@ print(response.json())
 - Incremental processing with watermark-based approach
 - Connection pooling (5 connections, 10 overflow)
 - Database indexes for performance
+- Synthetic data generation (10,000+ rows)
 
 ### Data Quality
-- Great Expectations for validation
-- Schema registry with Avro
+- Great Expectations for validation rules
+- Schema registry with Avro for data contracts
 - Data lineage tracking
-- Automated backup/restore
+- Automated backup/restore scripts
 
 ### Transformations
 - dbt for SQL-based transformations
 - Staging views for clean data
-- Mart tables for analytics
+- Mart tables for fraud analytics
 
-### Versioning
-- DVC for data and model versioning
-- Parameters in configs/params.yaml
+### Feature Store
+- Redis-backed feature caching
+- Precomputed engineered features
+- TTL-based invalidation
+
+### Drift Detection
+- Population Stability Index (PSI)
+- Kolmogorov-Smirnov tests
+- Concept drift monitoring
+- Alert recommendations
 
 ---
 
 ## Machine Learning Features
 
-- Ensemble model (XGBoost + RandomForest + LogisticRegression)
-- 14 engineered features
+- Ensemble model (XGBoost + RandomForest)
+- 14 engineered features based on fraud patterns
 - Optimized threshold (0.35) for better recall
+- SHAP explainability integration
 - Model persistence with joblib
 - Feature importance analysis
 - Decision logging
+
+### Synthetic Data Generation
+
+Generate realistic insurance claims data with learnable fraud patterns:
+
+```python
+from src.data.ingestion.synthetic_data import generate_claims_data
+
+df = generate_claims_data(10000, fraud_rate=0.24)
+df.to_csv('data/raw/insurance_claims.csv', index=False)
+```
+
+Fraud patterns injected:
+- No witness + bodily injuries (60% of fraud)
+- High claim-to-premium ratio (70% of fraud)
+- New customers (50% of fraud)
+- Nighttime incidents (40% of fraud)
 
 ---
 
@@ -272,11 +318,13 @@ pytest tests/ -v
 pytest tests/ --cov=. --cov-report=html
 ```
 
-**56 tests passing** (100%)
+**56+ tests passing**
 
 ---
 
-## Docker
+## Deployment
+
+### Docker
 
 ```bash
 # Start all services
@@ -288,15 +336,23 @@ docker-compose up -d
 # - dashboard:8501
 ```
 
-### Manual Docker Build
+### Kubernetes
 
 ```bash
-# Build image
-docker build -t fraud-detection .
+# Apply manifests
+kubectl apply -f k8s/deployment.yaml
 
-# Run container
-docker run -p 8000:8000 -p 8501:8501 fraud-detection
+# Check status
+kubectl get pods -l app=fraud-detection
 ```
+
+### AWS ECS
+
+See `aws/ecs-deployment.md` for:
+- ECR image push instructions
+- ECS task definition
+- Fargate deployment
+- RDS/ElastiCache setup
 
 ---
 
@@ -308,16 +364,6 @@ docker run -p 8000:8000 -p 8501:8501 fraud-detection
 | `DATABASE_URL` | PostgreSQL connection string | postgresql://... |
 | `API_KEY` | API key for protected endpoints | (none) |
 | `LOG_LEVEL` | Logging level (DEBUG/INFO/WARNING) | INFO |
-
-### Production Checklist
-
-- [ ] Set `ENV=production` in environment
-- [ ] Use strong `API_KEY` (generate with `openssl rand -hex 32`)
-- [ ] Configure `DATABASE_URL` to production PostgreSQL
-- [ ] Set `LOG_LEVEL=WARNING` to reduce log volume
-- [ ] Use reverse proxy (nginx) for SSL termination
-- [ ] Set up monitoring (Prometheus/Grafana)
-- [ ] Configure automated backups
 
 ---
 
